@@ -5,74 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>빵집 재고 관리</title>
 <style>
-  :root { --bg:#fff8f0; --card:#fff; --line:#e8d9c5; --brown:#7a4a21; --warn:#d9534f; --amber:#e8a317; --ok:#2e7d32; }
+  :root {
+    --bg:#f6f4f1; --card:#ffffff; --line:#ece7e1; --text:#2b2622; --muted:#8a8178;
+    --primary:#c2672d; --primary-d:#a9551f; --primary-l:#fbeee4;
+    --red:#d64545; --red-l:#fdeceb; --amber:#c98a0b; --amber-l:#fff4d6; --green:#2f8f5b; --green-l:#e5f5ec; --blue:#3b6fd4; --blue-l:#e8effc;
+    --shadow:0 1px 2px rgba(40,30,20,.06), 0 4px 14px rgba(40,30,20,.05);
+  }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:"Malgun Gothic",sans-serif; background:var(--bg); color:#333; }
-  header { background:var(--brown); color:#fff; padding:16px 24px; font-size:20px; font-weight:bold; }
-  main { max-width:1100px; margin:20px auto; padding:0 16px; display:grid; gap:20px; grid-template-columns:2fr 1fr; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
-  section.wide { grid-column:1 / -1; }
-  h2 { margin:0 0 12px; font-size:17px; color:var(--brown); }
+  body { margin:0; font-family:"Pretendard","Malgun Gothic",system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--card); border-bottom:1px solid var(--line); padding:14px 28px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:5; }
+  .logo { width:36px; height:36px; border-radius:10px; background:var(--primary-l); display:grid; place-items:center; font-size:20px; }
+  header h1 { font-size:18px; margin:0; }
+  header small { color:var(--muted); margin-left:auto; }
+  main { max-width:1180px; margin:24px auto 60px; padding:0 20px; display:grid; gap:20px; }
+
+  /* 요약 카드 */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .stat { background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:16px 18px; display:flex; align-items:center; gap:14px; }
+  .stat .ic { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:22px; }
+  .stat b { display:block; font-size:26px; line-height:1.1; }
+  .stat span { color:var(--muted); font-size:13px; }
+
+  .grid { display:grid; grid-template-columns:1.8fr 1fr; gap:20px; align-items:start; }
+  section { background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:20px; }
+  h2 { margin:0 0 14px; font-size:16px; display:flex; align-items:center; gap:8px; }
+  h2 i { font-style:normal; background:var(--primary-l); color:var(--primary); width:24px; height:24px; border-radius:7px; display:grid; place-items:center; font-size:13px; font-weight:700; }
+
   table { width:100%; border-collapse:collapse; font-size:14px; }
-  th, td { padding:8px; border-bottom:1px solid var(--line); text-align:left; }
-  th { background:#faf0e2; }
-  tr.low td { background:#fdecea; }
-  tr.zero td { background:#f8d7d5; font-weight:bold; }
-  input, select, button { font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; }
-  button { background:var(--brown); color:#fff; border:none; cursor:pointer; }
-  button.small { background:#bbb; padding:3px 8px; font-size:12px; }
-  button.small.confirm { background:var(--warn); }
-  form { display:grid; gap:10px; }
-  label { display:grid; gap:4px; font-size:13px; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:end; }
-  .row label { flex:1; min-width:110px; }
-  .alert { padding:8px 10px; border-radius:6px; margin-bottom:6px; font-size:14px; }
-  .alert.zero { background:#f8d7d5; } .alert.low { background:#fdecea; }
-  .alert.exp { background:#fff3cd; } .alert.info { background:#e8f5e9; }
-  .empty { color:#888; font-size:14px; }
-  .msg { font-size:13px; min-height:18px; color:var(--warn); }
-  @media (max-width:800px){ main{ grid-template-columns:1fr; } }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:none; text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  td { padding:11px 10px; border-bottom:1px solid var(--line); }
+  tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:#faf8f5; }
+  .name { font-weight:600; }
+
+  .badge { display:inline-block; white-space:nowrap; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .b-ok { background:var(--green-l); color:var(--green); }
+  .b-low { background:var(--amber-l); color:var(--amber); }
+  .b-zero { background:var(--red-l); color:var(--red); }
+  .b-in { background:var(--blue-l); color:var(--blue); }
+  .b-out { background:var(--primary-l); color:var(--primary); }
+
+  input, select { font:inherit; width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:#fff; color:inherit; }
+  input:focus, select:focus { outline:2px solid var(--primary-l); border-color:var(--primary); }
+  button { font:inherit; font-weight:600; cursor:pointer; border:none; border-radius:9px; padding:10px 16px; background:var(--primary); color:#fff; }
+  button:hover { background:var(--primary-d); }
+  button.small { white-space:nowrap; background:#f0ece7; color:var(--muted); padding:4px 10px; font-size:12px; }
+  button.small:hover { background:#e6e0d9; }
+  button.small.confirm { background:var(--red); color:#fff; }
+  form { display:grid; gap:12px; }
+  label { display:grid; gap:5px; font-size:13px; color:var(--muted); font-weight:600; }
+  .row { display:grid; grid-template-columns:1.3fr .8fr 1fr auto; gap:10px; align-items:end; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .seg { display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#f3efea; padding:4px; border-radius:11px; }
+  .seg button { background:transparent; color:var(--muted); padding:8px; }
+  .seg button.on { background:#fff; color:var(--primary); box-shadow:var(--shadow); }
+  .msg { font-size:13px; min-height:18px; color:var(--red); }
+
+  .alerts { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+  .alert { padding:12px 14px; border-radius:11px; font-size:14px; border-left:4px solid; }
+  .alert.zero { background:var(--red-l); border-color:var(--red); }
+  .alert.low { background:var(--amber-l); border-color:var(--amber); }
+  .alert.exp { background:#fff0e3; border-color:var(--primary); }
+  .alert.info { background:var(--blue-l); border-color:var(--blue); }
+  .alert.good { background:var(--green-l); border-color:var(--green); }
+  .empty { color:var(--muted); font-size:14px; padding:10px 0; }
+
+  @media (max-width:900px){ .stats{grid-template-columns:repeat(2,1fr);} .grid{grid-template-columns:1fr;} .row{grid-template-columns:1fr 1fr;} }
 </style>
 </head>
 <body>
-<header>🥐 빵집 재고 관리</header>
+<header>
+  <div class="logo">🥐</div><h1>빵집 재고 관리</h1><small id="todayLabel"></small>
+</header>
 <main>
 
-  <!-- 섹션 A. 재고목록 -->
-  <section id="listSec">
-    <h2>A. 재고목록</h2>
-    <form id="addForm" class="row" style="margin-bottom:14px">
-      <label>품목 이름<input id="aName" required placeholder="예: 밀가루"></label>
-      <label>단위<input id="aUnit" required placeholder="kg, 개" size="6"></label>
-      <label>최소 보유량<input id="aMin" type="number" min="0" step="any" required value="0"></label>
-      <button>품목 추가</button>
-    </form>
-    <div id="listBox"></div>
-  </section>
+  <div class="stats" id="stats"></div>
 
-  <!-- 섹션 B. 입출고 입력 -->
-  <section id="ioSec">
-    <h2>B. 입출고 입력</h2>
-    <form id="ioForm">
-      <label>1. 품목 선택<select id="ioItem" required></select></label>
-      <label>2. 입고 / 출고
-        <select id="ioType"><option value="in">입고</option><option value="out">출고</option></select>
-      </label>
-      <label>3. 수량<input id="ioQty" type="number" min="0" step="any" required></label>
-      <label id="expWrap">유통기한 (입고 시, 선택)<input id="ioExp" type="date"></label>
-      <button>4. 저장</button>
-      <div class="msg" id="ioMsg"></div>
-    </form>
-  </section>
+  <div class="grid">
+    <!-- 섹션 A. 재고목록 -->
+    <section id="listSec">
+      <h2><i>A</i>재고목록</h2>
+      <form id="addForm" class="row">
+        <label>품목 이름<input id="aName" required placeholder="예: 밀가루"></label>
+        <label>단위<input id="aUnit" required placeholder="kg, 개"></label>
+        <label>최소 보유량<input id="aMin" type="number" min="0" step="any" required value="0"></label>
+        <button>+ 추가</button>
+      </form>
+      <div id="listBox"></div>
+    </section>
+
+    <!-- 섹션 B. 입출고 입력 -->
+    <section id="ioSec">
+      <h2><i>B</i>입출고 입력</h2>
+      <form id="ioForm">
+        <label>1. 품목 선택<select id="ioItem" required></select></label>
+        <label>2. 입고 / 출고
+          <div class="seg">
+            <button type="button" id="segIn" class="on">입고</button>
+            <button type="button" id="segOut">출고</button>
+          </div>
+        </label>
+        <input type="hidden" id="ioType" value="in">
+        <label>3. 수량<input id="ioQty" type="number" min="0" step="any" required placeholder="0"></label>
+        <label id="expWrap">유통기한 (입고 시, 선택)<input id="ioExp" type="date"></label>
+        <button>4. 저장</button>
+        <div class="msg" id="ioMsg"></div>
+      </form>
+    </section>
+  </div>
 
   <!-- 섹션 C. 알림 -->
-  <section id="alertSec" class="wide">
-    <h2>C. 알림</h2>
-    <div id="alertBox"></div>
+  <section id="alertSec">
+    <h2><i>C</i>알림</h2>
+    <div class="alerts" id="alertBox"></div>
   </section>
 
-  <section class="wide">
-    <h2>최근 입출고 기록</h2>
+  <section>
+    <h2><i>≡</i>최근 입출고 기록</h2>
     <div id="logBox"></div>
   </section>
 </main>
@@ -80,10 +128,9 @@
 <script>
 const KEY = "bakery-stock-v1";
 const EXPIRE_DAYS = 3; // 유통기한 임박 기준(일)
+const LOW_QTY = 5;     // 수량이 이 값 이하이면 알림에 표시
 let data = { items: [], logs: [] };
 let pendingDel = null;
-const LOW_QTY = 5; // 수량이 이 값 이하이면 알림에 표시
-const isLow = i => i.qty <= Math.max(i.min, LOW_QTY);
 
 try { data = JSON.parse(localStorage.getItem(KEY)) || data; } catch (e) {}
 if (!Array.isArray(data.items) || !Array.isArray(data.logs)) data = { items: [], logs: [] };
@@ -92,15 +139,33 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 const daysLeft = exp => Math.round((new Date(exp+"T00:00:00") - new Date(today()+"T00:00:00")) / 86400000);
+const isLow = i => i.qty <= Math.max(i.min, LOW_QTY);
+const isExpiring = i => i.expiry && i.qty > 0 && daysLeft(i.expiry) <= EXPIRE_DAYS;
 
 function render() {
+  $("todayLabel").textContent = today();
+
+  // 요약 카드
+  const total = data.items.length;
+  const zero = data.items.filter(i => i.qty <= 0).length;
+  const low = data.items.filter(i => i.qty > 0 && isLow(i)).length;
+  const exp = data.items.filter(isExpiring).length;
+  const card = (ic, bg, color, num, label) => `<div class="stat"><div class="ic" style="background:${bg};color:${color}">${ic}</div><div><b>${num}</b><span>${label}</span></div></div>`;
+  $("stats").innerHTML =
+    card("📦","var(--blue-l)","var(--blue)",total,"전체 품목") +
+    card("⚠️","var(--amber-l)","var(--amber)",low,"재고 부족") +
+    card("⛔","var(--red-l)","var(--red)",zero,"품절") +
+    card("⏰","var(--primary-l)","var(--primary)",exp,"유통기한 임박");
+
   // A. 재고목록
+  const status = i => i.qty <= 0 ? '<span class="badge b-zero">품절</span>' : isLow(i) ? '<span class="badge b-low">부족</span>' : '<span class="badge b-ok">정상</span>';
   $("listBox").innerHTML = data.items.length ? `
-    <table><tr><th>품목</th><th>현재 수량</th><th>유통기한</th><th>최소 보유량</th><th></th></tr>
-    ${data.items.map(i => `<tr class="${i.qty<=0?'zero':isLow(i)?'low':''}">
-      <td>${esc(i.name)}</td><td>${i.qty} ${esc(i.unit)}</td><td>${i.expiry||"-"}</td>
-      <td>${i.min} ${esc(i.unit)}</td><td><button class="small${pendingDel===i.id?' confirm':''}" data-del="${i.id}">${pendingDel===i.id?'정말 삭제?':'삭제'}</button></td></tr>`).join("")}
-    </table>` : `<div class="empty">아직 품목이 없습니다. 위에서 추가해 주세요.</div>`;
+    <table><thead><tr><th>품목</th><th>현재 수량</th><th>유통기한</th><th>최소 보유량</th><th>상태</th><th></th></tr></thead><tbody>
+    ${data.items.map(i => `<tr>
+      <td class="name">${esc(i.name)}</td><td>${i.qty} ${esc(i.unit)}</td><td>${i.expiry||"-"}</td>
+      <td>${i.min} ${esc(i.unit)}</td><td>${status(i)}</td>
+      <td><button class="small${pendingDel===i.id?' confirm':''}" data-del="${i.id}">${pendingDel===i.id?'정말 삭제?':'삭제'}</button></td></tr>`).join("")}
+    </tbody></table>` : `<div class="empty">아직 품목이 없습니다. 위에서 추가해 주세요.</div>`;
 
   // B. 품목 선택 목록
   const cur = $("ioItem").value;
@@ -110,23 +175,24 @@ function render() {
   // C. 알림
   const a = [];
   data.items.forEach(i => {
-    if (i.qty <= 0) a.push(`<div class="alert zero">⛔ 품절: ${esc(i.name)}</div>`);
-    else if (isLow(i)) a.push(`<div class="alert low">⚠️ 재고 부족: ${esc(i.name)} (${i.qty}${esc(i.unit)} 남음)</div>`);
+    if (i.qty <= 0) a.push(`<div class="alert zero">⛔ <b>품절</b> · ${esc(i.name)}</div>`);
+    else if (isLow(i)) a.push(`<div class="alert low">⚠️ <b>재고 부족</b> · ${esc(i.name)} (${i.qty}${esc(i.unit)} 남음)</div>`);
     if (i.expiry && i.qty > 0) {
       const d = daysLeft(i.expiry);
-      if (d < 0) a.push(`<div class="alert exp">⏰ 유통기한 지남: ${esc(i.name)} (${i.expiry})</div>`);
-      else if (d <= EXPIRE_DAYS) a.push(`<div class="alert exp">⏰ 유통기한 임박: ${esc(i.name)} (${d}일 남음, ${i.expiry})</div>`);
+      if (d < 0) a.push(`<div class="alert exp">⏰ <b>유통기한 지남</b> · ${esc(i.name)} (${i.expiry})</div>`);
+      else if (d <= EXPIRE_DAYS) a.push(`<div class="alert exp">⏰ <b>유통기한 임박</b> · ${esc(i.name)} (${d}일 남음, ${i.expiry})</div>`);
     }
   });
+  if (!a.length && data.items.length) a.push(`<div class="alert good">✅ 모든 재고가 정상입니다.</div>`);
   const t = data.logs.filter(l => l.date === today());
   const sum = type => { const m = {}; t.filter(l=>l.type===type).forEach(l => m[l.name+"|"+l.unit] = (m[l.name+"|"+l.unit]||0)+l.qty);
     return Object.entries(m).map(([k,v]) => k.split("|")[0]+" "+v+k.split("|")[1]).join(", ") || "없음"; };
-  a.push(`<div class="alert info">📋 오늘 입출고 요약<br>입고: ${esc(sum("in"))}<br>출고: ${esc(sum("out"))}</div>`);
+  a.push(`<div class="alert info">📋 <b>오늘 입출고 요약</b><br>입고: ${esc(sum("in"))}<br>출고: ${esc(sum("out"))}</div>`);
   $("alertBox").innerHTML = a.join("");
 
   // 기록
-  $("logBox").innerHTML = data.logs.length ? `<table><tr><th>날짜</th><th>품목</th><th>구분</th><th>수량</th></tr>
-    ${data.logs.slice(-15).reverse().map(l => `<tr><td>${l.date}</td><td>${esc(l.name)}</td><td>${l.type==="in"?"입고":"출고"}</td><td>${l.qty} ${esc(l.unit)}</td></tr>`).join("")}</table>`
+  $("logBox").innerHTML = data.logs.length ? `<table><thead><tr><th>날짜</th><th>품목</th><th>구분</th><th>수량</th></tr></thead><tbody>
+    ${data.logs.slice(-15).reverse().map(l => `<tr><td>${l.date}</td><td class="name">${esc(l.name)}</td><td><span class="badge ${l.type==="in"?"b-in":"b-out"}">${l.type==="in"?"입고":"출고"}</span></td><td>${l.qty} ${esc(l.unit)}</td></tr>`).join("")}</tbody></table>`
     : `<div class="empty">기록이 없습니다.</div>`;
 }
 
@@ -144,7 +210,14 @@ $("listBox").onclick = e => {
   pendingDel = null; save(); render();
 };
 
-$("ioType").onchange = () => { $("expWrap").style.display = $("ioType").value === "in" ? "" : "none"; };
+function setType(type) {
+  $("ioType").value = type;
+  $("segIn").classList.toggle("on", type === "in");
+  $("segOut").classList.toggle("on", type === "out");
+  $("expWrap").style.display = type === "in" ? "" : "none";
+}
+$("segIn").onclick = () => setType("in");
+$("segOut").onclick = () => setType("out");
 
 $("ioForm").onsubmit = e => {
   e.preventDefault();
